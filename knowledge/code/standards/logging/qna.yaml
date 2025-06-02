@@ -105,5 +105,33 @@ seed_examples:
           What if I need to log an entry that contains sensitive data?
         answer: |
           Data masking is a one-way irreversible process for protecting sensitive data. A masking method creates a version of the sensitive data that looks structurally similar to the original but hides the most sensitive information contained within a field. Redaction is similar to masking, but hides all of the information contained within a field.
+  - context: |
+      This is a bad idea
+        logger.log("User %s performed this action", userId)
+      
+      Instead you should log a tokenized entry
+        userToken = tokenize(userId);
+        logger.log("User %s performed this action", userToken)
+
+
+      You should not log things like SSN for example
+        logger.log("The user updated their ssn=%s", ssn)
+
+      But instead you should redact the entry like this by replacing with a placeholder such as x's
+        logger.log("The user updated their ssn=xxx")
+    questions_and_answers:
+      - question: |
+          What is a bad way to log information about the user
+        answer: |
+          logger.log("User %s performed this action", userId)
+      - question: |
+          Should I log things like ssn as clear text?
+        answer: |
+          No, logger.log("User %s performed this action", userToken) is a bad idea and should be avoided
+      - question: |
+          How do I mask sensistive data?
+        answer: |
+          But instead you should redact the entry like this by replacing with a placeholder such as x's
+          logger.log("The user updated their ssn=xxx")
 document_outline: |
   Overview of different types of logging standards that should be followed
