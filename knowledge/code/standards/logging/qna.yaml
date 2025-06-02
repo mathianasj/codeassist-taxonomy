@@ -1,5 +1,5 @@
 version: 3
-domain: Fandom
+domain: code
 created_by: mairin
 seed_examples:
   - context: |
