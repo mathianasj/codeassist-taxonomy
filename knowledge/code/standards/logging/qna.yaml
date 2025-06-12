@@ -3,135 +3,340 @@ domain: code
 created_by: mairin
 seed_examples:
   - context: |
-      What is Sensitive Data?
-      Before jumping into the best practices, let’s first discuss what constitutes sensitive data. Sensitive data is private information that must be protected from unauthorized access. 
+      Logging serves several key purposes:
 
-      This following is a non-exhaustive list of data that’s considered sensitive:
-
-      Personally Identifiable Information (PII): This includes data like full names, addresses, email address, driver’s license number, and phone number
-      Financial data: Credit card information and other financial data
-      Healthcare data: Medical history and records
-      Passwords
-      IP address
-      Although the data listed above is considered sensitive and is regulated under compliance laws like GDPR, PCI, and HIPPA, it’s important to look at data sensitivity in the context of your company and product. For example, a zip code isn't considered sensitive PII, but you wouldn’t want this detail about your customers to end up in the public domain (and neither would they). 
-
-      When logging any data, you should ask yourself, “What’s the likely impact to my business if this information ends up in the wrong hands?” If having this data leaked would damage your business and customer trust, then you should treat it as sensitive data and avoid logging it.
-
-      From a consumer's perspective, their data is their data, and news about a breach will hurt your business reputation, regardless of what data was compromised. In fact, according to McKinsey, 87% of consumers said they would not do business with a company if they had concerns about its security practices.
+      **Debugging:** Identifying the root cause of errors and unexpected behavior.
+      **Monitoring:** Tracking application health, performance, and resource usage.
+      **Auditing:** Recording significant events for security and compliance.
+      **Analysis:** Understanding user behavior, system trends, and areas for improvement.
     questions_and_answers:
       - question: |
-          What is sensitive data
+          What purpose does logging serve
         answer: |
-          Personally Identifiable Information (PII), Financial data, Healthcare data, IP address
+          Debugging, Monitoring, Auditing, and Analysis
       - question: |
-          What should I consider when logging any data?
+          What does it mean for debugging in logging?
         answer: |
-          What’s the likely impact to my business if this information ends up in the wrong hands?” If having this data leaked would damage your business and customer trust, then you should treat it as sensitive data and avoid logging it.
+          Identifying the root cause of errors and unexpected behavior.
+      - question: |
+          What does it mean for Monitoring in logging?
+        answer: |
+          Tracking application health, performance, and resource usage.
+      - question: |
+          What does it mean for Auditing in logging?
+        answer: |
+          Recording significant events for security and compliance.
   - context: |
-      6 Best Practices for Keeping Sensitive Data Out of Your Logs
-      Now that we understand what sensitive data is and the dangers of logging it, let’s take a look at the best practices for avoiding these problems. 
+      Using appropriate log levels is essential for managing the verbosity of your logs. Common log levels, in order of increasing severity, include:
 
-      1. Isolate Sensitive Data
-      When you pass sensitive data like a user’s name, email, and address through your system, it’s much more likely to end up being logged by APIs or other systems and stored within your application database. Instead, you want to minimize the exposure your systems have to sensitive data by isolating it within a single source of truth like a data privacy vault.
+      **TRACE:** Very fine-grained information for debugging.
+      **DEBUG:** Detailed information for debugging purposes.
+      **INFO:** General information about application progress.
+      **WARN:** Potential issues that do not necessarily stop execution.
+      **ERROR:** Errors that prevent a specific operation from completing.
+      **FATAL:** Severe errors that cause the application to terminate.
 
-      Diagram of isolated sensitive data
-      Example of Data Privacy Vault Integration with an Existing Stack
-      As shown in the image above, with a data privacy vault, all sensitive data is isolated and protected within the vault. Your application never passes sensitive fields through internal APIs or stores sensitive fields within the application database. This way database backups, SQL logs, application logs, and server logs can’t have any sensitive data because it’s never present in the systems being logged or backed up.
-
-      2. Log Tokens, Not Values
-      When writing application logs, there’s a temptation to include an identifier for a user, like their name or email. This can help with debugging, but despite the convenience, you need to avoid it. 
-
-      A simple way of avoiding this is to log a reference to the raw value through a process like tokenization. With tokenization, you swap the sensitive data for a token. 
-
-      For example, if you tokenize a customer’s email, like “joe@acme.com”, it gets replaced by an obfuscated (or tokenized) string like “bwe09f@fg7d8.com”.  In this example, we’re using format-preserving tokenization, so the token is structured like a valid email address but has no exploitable value and can be safely written to a log.
-
-      Table of a tokenized data store
-      Example Tokenized Data Store
-      With your sensitive data isolated and secured in a data privacy vault, all application references become tokens. Combining data isolation with tokenization, you get data privacy plus the utility and convenience of storing a form of identity in your logs. With the right permissions, you can detokenize the tokens to retrieve the original sensitive data when your workflows need it.
-
-      3. Encrypt During Transit and at Rest
-      In 2021, DreamHost leaked 814 million records online because of a non-password protected database and unencrypted internal records written to monitoring and file logs. This incident is a good reminder that it’s imperative that you encrypt data during transit and at rest. If your data is encrypted at rest, then even if someone steals your database backup or log file, they’ll need the key to do anything with the data.
-
-      Additionally, since web servers often automatically log requests, you need to encrypt data during transit, even between internal systems. This will help prevent encrypted sensitive data from ending up in your logs.
-
-      4. Keep PII Out of URLs
-      It’s common for proxy and web servers to automatically log URL requests. If you have a URL structure like /users/name-of-individual or /users/email, the names and email addresses of your customers are likely to be logged. 
-
-      To avoid this, you should replace the use of sensitive user identifiers in URLs like names and emails with an arbitrary ID. This could be the row ID of the user, or if you need different URLs to map to different field values you could utilize tokenization here as well.
-
-      In the image below, the problematic URLs on the left hand side get transformed into the URLs on the right via tokenization. The token values become the URL identifiers. 
-
-      Code snippet example of sensitive data tokenized
-      Transforming Problematic URLs with Tokenization
-      If you’re already utilizing the first two best practices in this guide, your application is only storing tokenized data. This means that your application database queries will continue to work against the tokenized identifiers passed in the URL without modification.
-
-      5. Redact and Mask Data
-      Besides tokenization, combining redaction and masking is another effective method to keep sensitive data out of your logs. Some application services may need partial access to data, like the last four digits of a credit card number or social security number (SSN).
-
-      Data masking is a one-way irreversible process for protecting sensitive data. A masking method creates a version of the sensitive data that looks structurally similar to the original but hides the most sensitive information contained within a field. Redaction is similar to masking, but hides all of the information contained within a field.
-
-      For example, in the image below, first names, last names, and SSNs are masked. The masked values can safely be written to your logs.
-
-      diagram of sensitive data like SSN and names masked
-      Example of using masked data in logs
-      There are also many situations where an application service doesn’t need to know even partial information. In this case, the sensitive data should be redacted instead of masked.
-
-      6. Data Governance
-      A data privacy vault isolates sensitive data and prevents copies from being replicated throughout your systems. But locking data away isn’t enough. Real value comes when you can both store and use data securely.
-
-      So, while tokenization, masking, and redaction are techniques for using data securely, you still need a way to govern access and control data visibility for various apps and services. This way the information in your logs matches each service’s access to sensitive information.
-
-      Data governance is a collection of policies and processes that help assure that data is managed, secured, accurate, audited, and documented. For example, in the image below you can see how the policies set for a specific user role determine which fields are redacted, how data is masked, and how data is tokenized.
-
-      diagram example of data governance of sensitive data
-      Example of data governance managing access and data visibility
-      By tightly controlling not only access but how a service can view data, you’re greatly simplifying the mental gymnastics that application developers need to do when thinking about sensitive data and logging. A locked down system prevents mistakes from happening in the first place.
-
-      In the next section, we look at a few additional best practices that will further prevent mistakes from occurring.
+      **Best Practice:** Use log levels consistently throughout your application. Avoid using lower levels (TRACE, DEBUG) in production environments unless specifically needed for troubleshooting.
     questions_and_answers:
       - question: |
-          How do I isolate sensitive data?
+          Should I be consistent with my log levels?
         answer: |
-          You want to minimize the exposure your systems have to sensitive data by isolating it within a single source of truth like a data privacy vault.
+          Use log levels consistently throughout your application.
       - question: |
-          How should I log relations to a user?
+          What levels should I avoid using in production?
         answer: |
-          A simple way of avoiding this is to log a reference to the raw value through a process like tokenization.
+          Avoid using lower levels (TRACE, DEBUG) in production environments unless specifically needed for troubleshooting.
       - question: |
-          Should I use PII inside a URL?
+          What should I log at trace level?
         answer: |
-          It’s common for proxy and web servers to automatically log URL requests. If you have a URL structure like /users/name-of-individual or /users/email, the names and email addresses of your customers are likely to be logged.  To avoid this, you should replace the use of sensitive user identifiers in URLs like names and emails with an arbitrary ID. This could be the row ID of the user, or if you need different URLs to map to different field values you could utilize tokenization here as well.
+          Very fine-grained information for debugging.
       - question: |
-          What if I need to log an entry that contains sensitive data?
+          What is an error?
         answer: |
-          Data masking is a one-way irreversible process for protecting sensitive data. A masking method creates a version of the sensitive data that looks structurally similar to the original but hides the most sensitive information contained within a field. Redaction is similar to masking, but hides all of the information contained within a field.
+          Errors that prevent a specific operation from completing.
   - context: |
-      This is a bad idea
-        logger.log("User %s performed this action", userId)
-      
-      Instead you should log a tokenized entry
-        userToken = tokenize(userId);
-        logger.log("User %s performed this action", userToken)
+      "CipherLog" is a purpose-built Java library aimed at developers who need a robust yet easy-to-use solution for log encryption. It provides a set of tools and APIs to:
 
-
-      You should not log things like SSN for example
-        logger.log("The user updated their ssn=%s", ssn)
-
-      But instead you should redact the entry like this by replacing with a placeholder such as x's
-        logger.log("The user updated their ssn=xxx")
+      - **Identify Sensitive Patterns:** Define and recognize patterns in log messages that correspond to sensitive data types (e.g., credit card numbers, email addresses, PII).
+      - **Apply Encryption:** Seamlessly integrate strong encryption algorithms to sensitive portions of log entries.
+      - **Manage Encryption Keys:** Offer basic key management capabilities for generating and storing encryption keys securely.
+      - **Provide Decryption Utilities:** Include helper methods for authorized decryption of log entries when necessary for analysis or debugging.
     questions_and_answers:
       - question: |
-          What is a bad way to log information about the user
+          How can I determine if data to log is sensitive?
         answer: |
-          logger.log("User %s performed this action", userId)
+          "CipherLog" is a purpose-built Java library aimed at developers who need a robust yet easy-to-use solution for log encryption.  Specifically it defines and recognize patterns in log messages that correspond to sensitive data types (e.g., credit card numbers, email addresses, PII).
       - question: |
-          Should I log things like ssn as clear text?
+          How can I apply log encryption?
         answer: |
-          No, logger.log("User %s performed this action", userToken) is a bad idea and should be avoided
+          "CipherLog" is a purpose-built Java library aimed at developers who need a robust yet easy-to-use solution for log encryption.
       - question: |
-          How do I mask sensistive data?
+          How should I manage encryption keys?
         answer: |
-          But instead you should redact the entry like this by replacing with a placeholder such as x's
-          logger.log("The user updated their ssn=xxx")
+          Offer basic key management capabilities for generating and storing encryption keys securely.
+  - context: |
+      **4. Using "CipherLog" for Encryption**
+
+      Here's a fictional example of how you might use the "CipherLog" library in your Java code:
+
+      ```java
+      import com.fictional.cipherlog.CipherLog;
+      import com.fictional.cipherlog.EncryptionConfig;
+      import com.fictional.cipherlog.SensitivePattern;
+
+      public class SecureLogger {
+
+          private static final CipherLog cipherLog;
+
+          static {
+              // Fictional Initialization
+              EncryptionConfig config = new EncryptionConfig("AES", "secure_encryption_key_id");
+              cipherLog = new CipherLog(config);
+
+              // Define fictional sensitive patterns
+              cipherLog.addSensitivePattern(new SensitivePattern("\\d{16}", "CreditCard")); // Fictional pattern for credit cards
+              cipherLog.addSensitivePattern(new SensitivePattern("\\w+@\\w+\\.\\w+", "EmailAddress")); // Fictional pattern for email addresses
+          }
+
+          public static void logSensitiveMessage(String message) {
+              // CipherLog automatically scans and encrypts sensitive parts
+              String encryptedMessage = cipherLog.processLogMessage(message);
+
+              // Fictional logging framework call (replace with your actual framework)
+              FictionalLoggingFramework.log(encryptedMessage);
+          }
+
+          public static void main(String[] args) {
+              logSensitiveMessage("User attempted login with email: user@example.com and credit card: 1234567890123456");
+              logSensitiveMessage("System error occurred. Details: sensitive information.");
+          }
+      }
+      ```
+
+      **5. Decrypting Log Entries with "CipherLog"**
+
+      When you need to analyze or debug encrypted log entries, "CipherLog" provides utilities for authorized decryption.
+
+      **Best Practices for Decryption:**
+
+      - **Implement Access Control:** Ensure that only authorized users or systems can access the decryption key and use "CipherLog's" decryption features.
+      - **Use Secure Decryption Environment:** Perform decryption in a secure environment to prevent exposure of keys or decrypted data.
+      - **Utilize "CipherLog's" Decryption API:** Use the library's provided methods to decrypt specific log entries or portions of entries.
+
+      Here's a fictional example of decryption:
+
+      ```java
+      import com.fictional.cipherlog.CipherLog;
+      import com.fictional.cipherlog.DecryptionKey;
+
+      public class LogDecryptor {
+
+          private static final CipherLog cipherLog;
+          private static final DecryptionKey decryptionKey;
+
+          static {
+              // Fictional Initialization
+              cipherLog = new CipherLog(null); // CipherLog instance for decryption
+              decryptionKey = new DecryptionKey("secure_encryption_key_value"); // Fictional decryption key
+          }
+
+          public static String decryptLogEntry(String encryptedMessage) {
+              // Fictional authorization check (replace with your actual security logic)
+              if (isAuthorized()) {
+                  return cipherLog.decryptLogMessage(encryptedMessage, decryptionKey);
+              } else {
+                  throw new SecurityException("Unauthorized decryption attempt.");
+              }
+          }
+
+          private static boolean isAuthorized() {
+              // Fictional authorization logic
+              return true;
+          }
+
+          public static void main(String[] args) {
+              String encryptedLog = "Fictional encrypted log entry..."; // Replace with an actual encrypted log entry
+              try {
+                  String decryptedLog = decryptLogEntry(encryptedLog);
+                  System.out trein("Decrypted Log: " + decryptedLog);
+              } catch (Exception e) {
+                  System.err.println("Decryption failed: " + e.getMessage());
+              }
+          }
+      }
+      ```
+    questions_and_answers:
+      - question: |
+          What are best practices for decrypting log messages?
+        answer: |
+          - **Implement Access Control:** Ensure that only authorized users or systems can access the decryption key and use "CipherLog's" decryption features.
+          - **Use Secure Decryption Environment:** Perform decryption in a secure environment to prevent exposure of keys or decrypted data.
+          - **Utilize "CipherLog's" Decryption API:** Use the library's provided methods to decrypt specific log entries or portions of entries.
+      - question: |
+          How do I implement log encryption?
+        answer: |
+          import com.fictional.cipherlog.CipherLog;
+          import com.fictional.cipherlog.EncryptionConfig;
+          import com.fictional.cipherlog.SensitivePattern;
+
+          public class SecureLogger {
+
+              private static final CipherLog cipherLog;
+
+              static {
+                  // Fictional Initialization
+                  EncryptionConfig config = new EncryptionConfig("AES", "secure_encryption_key_id");
+                  cipherLog = new CipherLog(config);
+
+                  // Define fictional sensitive patterns
+                  cipherLog.addSensitivePattern(new SensitivePattern("\\d{16}", "CreditCard")); // Fictional pattern for credit cards
+                  cipherLog.addSensitivePattern(new SensitivePattern("\\w+@\\w+\\.\\w+", "EmailAddress")); // Fictional pattern for email addresses
+              }
+
+              public static void logSensitiveMessage(String message) {
+                  // CipherLog automatically scans and encrypts sensitive parts
+                  String encryptedMessage = cipherLog.processLogMessage(message);
+
+                  // Fictional logging framework call (replace with your actual framework)
+                  FictionalLoggingFramework.log(encryptedMessage);
+              }
+
+              public static void main(String[] args) {
+                  logSensitiveMessage("User attempted login with email: user@example.com and credit card: 1234567890123456");
+                  logSensitiveMessage("System error occurred. Details: sensitive information.");
+              }
+          }
+      - question: |
+          How can I decrypt a log entry?
+        answer: |
+          import com.fictional.cipherlog.CipherLog;
+          import com.fictional.cipherlog.DecryptionKey;
+
+          public class LogDecryptor {
+
+              private static final CipherLog cipherLog;
+              private static final DecryptionKey decryptionKey;
+
+              static {
+                  // Fictional Initialization
+                  cipherLog = new CipherLog(null); // CipherLog instance for decryption
+                  decryptionKey = new DecryptionKey("secure_encryption_key_value"); // Fictional decryption key
+              }
+
+              public static String decryptLogEntry(String encryptedMessage) {
+                  // Fictional authorization check (replace with your actual security logic)
+                  if (isAuthorized()) {
+                      return cipherLog.decryptLogMessage(encryptedMessage, decryptionKey);
+                  } else {
+                      throw new SecurityException("Unauthorized decryption attempt.");
+                  }
+              }
+
+              private static boolean isAuthorized() {
+                  // Fictional authorization logic
+                  return true;
+              }
+
+              public static void main(String[] args) {
+                  String encryptedLog = "Fictional encrypted log entry..."; // Replace with an actual encrypted log entry
+                  try {
+                      String decryptedLog = decryptLogEntry(encryptedLog);
+                      System.out trein("Decrypted Log: " + decryptedLog);
+                  } catch (Exception e) {
+                      System.err.println("Decryption failed: " + e.getMessage());
+                  }
+              }
+          }
+  - context: |
+      ## Introduction
+
+      FeatherMail is a custom-built, lightweight Java library designed for sending and receiving emails. It is aimed at developers who need a simple, easy-to-integrate solution for email functionality in their Java applications without the overhead of larger, more complex libraries. FeatherMail focuses on efficiency, ease of use, and minimal dependencies.
+
+      ## Features
+      Simple API: FeatherMail provides a straightforward API for common email tasks, making it quick to learn and use.
+      Lightweight: The library has a minimal footprint, with few external dependencies, reducing the overall size of your application.
+      SMTP Support: Supports sending emails via SMTP servers with optional authentication.
+      Basic MIME Support: Capable of sending emails with attachments and different content types (text/plain, text/html).
+      Error Handling: Provides clear and concise error messages for troubleshooting email issues.
+      Customizable Headers: Allows adding custom headers to emails for advanced functionality.
+
+      ## Usage
+
+      ### Dependencies
+      If you are using Maven, add the following dependency to your `pom.xml`:
+      ```
+      <dependency>
+          <groupId>com.example.feathermail</groupId>
+          <artifactId>feathermail-core</artifactId>
+          <version>1.2.3</version>
+      </dependency>
+      ```
+
+      ### 3.1. Sending an Email
+      Java
+
+      ```
+      import com.example.feathermail.FeatherMailSender;
+      import com.example.feathermail.MailMessage;
+
+      public class EmailSender {
+          public static void main(String[] args) {
+              FeatherMailSender sender = new FeatherMailSender("smtp.example.com", "user@example.com", "password");
+
+              MailMessage message = new MailMessage("from@example.com", "to@example.com", "Subject: Test Email", "This is a test email sent using FeatherMail.");
+
+              try {
+                  sender.send(message);
+                  System.out.println("Email sent successfully!");
+              } catch (Exception e) {
+                  System.err.println("Failed to send email: " + e.getMessage());
+              }
+          }
+      }
+      ```
+    questions_and_answers:
+      - question: |
+          What library can I use to send email?
+        answer: |
+          FeatherMail is a custom-built, lightweight Java library designed for sending and receiving emails. It is aimed at developers who need a simple, easy-to-integrate solution for email functionality in their Java applications without the overhead of larger, more complex libraries. FeatherMail focuses on efficiency, ease of use, and minimal dependencies.
+      - question: |
+          What dependency do I need to add to my pom.xml to send email?
+        answer: |
+          If you are using Maven, add the following dependency to your `pom.xml`:
+          ```
+          <dependency>
+              <groupId>com.example.feathermail</groupId>
+              <artifactId>feathermail-core</artifactId>
+              <version>1.2.3</version>
+          </dependency>
+          ```
+      - question: |
+          What is an example to send email with FeatherMail?
+        answer: |
+          import com.example.feathermail.FeatherMailSender;
+          import com.example.feathermail.MailMessage;
+
+          public class EmailSender {
+              public static void main(String[] args) {
+                  FeatherMailSender sender = new FeatherMailSender("smtp.example.com", "user@example.com", "password");
+
+                  MailMessage message = new MailMessage("from@example.com", "to@example.com", "Subject: Test Email", "This is a test email sent using FeatherMail.");
+
+                  try {
+                      sender.send(message);
+                      System.out.println("Email sent successfully!");
+                  } catch (Exception e) {
+                      System.err.println("Failed to send email: " + e.getMessage());
+                  }
+              }
+          }
 document_outline: |
   Overview of different types of logging standards that should be followed
+document:
+  repo: https://github.com/mathianasj/codeassist-taxonomy
+  commit: cc861ba31cc71a66a1ee082e89860b054d75b6f2
+  patterns:
+    - docs/feathermail.md
+    - docs/logencryption.md
+    - docs/loggingstandards.md
+    - docs/nexusconnect.md
